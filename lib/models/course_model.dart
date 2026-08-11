@@ -5,8 +5,9 @@ class CourseModel {
   String? name;
   String? code;
   DateTime? createdAt;
+  String? teacherId;
 
-  CourseModel({this.docId, this.name, this.code, this.createdAt});
+  CourseModel({this.docId, this.name, this.code, this.createdAt, this.teacherId});
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
     return CourseModel(
@@ -15,6 +16,7 @@ class CourseModel {
       createdAt: (json['createdAt'] is Timestamp)
           ? (json['createdAt'] as Timestamp).toDate()
           : null,
+      teacherId: json['teacherId'] as String? ?? '',
     );
   }
 
@@ -23,6 +25,7 @@ class CourseModel {
       'name': name,
       'code': code,
       'createdAt': createdAt ?? DateTime.now(),
+      'teacherId': teacherId,
     };
   }
 }

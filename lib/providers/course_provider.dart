@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:attendance_routine_app/models/course_model.dart';
 import 'package:attendance_routine_app/utility/firebase_constant.dart';
@@ -6,7 +7,11 @@ import 'package:attendance_routine_app/utility/firebase_constant.dart';
 class CourseProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  String? get _currentTeacherId => FirebaseAuth.instance.currentUser?.uid;
+
   Future<void> addCourse(CourseModel course) async {
+    course.teacherId = _currentTeacherId;
+
     final response = await _firestore
         .collection(FirebaseConstant.coursesCollection)
         .add(course.toJson());
@@ -15,6 +20,7 @@ class CourseProvider with ChangeNotifier {
   }
 
   Future<void> editCourse(String docId, CourseModel course) async {
+    course.teacherId ??= _currentTeacherId; // preserve original owner
     await _firestore
         .collection(FirebaseConstant.coursesCollection)
         .doc(docId)
@@ -33,6 +39,7 @@ class CourseProvider with ChangeNotifier {
   Stream<List<CourseModel>> streamCourses() {
     return _firestore
         .collection(FirebaseConstant.coursesCollection)
+        .where('teacherId', isEqualTo: _currentTeacherId)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) {
               final course = CourseModel.fromJson(doc.data());

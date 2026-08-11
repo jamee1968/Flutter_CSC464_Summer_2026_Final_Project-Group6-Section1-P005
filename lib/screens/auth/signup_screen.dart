@@ -1,120 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:attendance_routine_app/providers/auth_provider.dart';
-import 'package:attendance_routine_app/screens/auth/signup_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
   String? errorMessage;
   bool isLoading = false;
   bool obscurePassword = true;
+  bool obscureConfirmPassword = true;
 
   @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
-  }
-
-  void _showForgotPasswordDialog(BuildContext context) {
-    final resetEmailController = TextEditingController(text: emailController.text);
-    String? dialogError;
-    String? dialogSuccess;
-    bool dialogLoading = false;
-    const primaryColor = Colors.brown;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text('Reset Password'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Enter your email and we\'ll send you a password reset link.',
-                    style: TextStyle(fontSize: 13),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: resetEmailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  if (dialogError != null) ...[
-                    const SizedBox(height: 12),
-                    Text(dialogError!, style: const TextStyle(color: Colors.red, fontSize: 13)),
-                  ],
-                  if (dialogSuccess != null) ...[
-                    const SizedBox(height: 12),
-                    Text(dialogSuccess!,
-                        style: const TextStyle(color: Colors.green, fontSize: 13)),
-                  ],
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-                dialogLoading
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : TextButton(
-                        onPressed: () async {
-                          final email = resetEmailController.text.trim();
-                          if (email.isEmpty) {
-                            setDialogState(() => dialogError = 'Enter your email');
-                            return;
-                          }
-
-                          setDialogState(() {
-                            dialogLoading = true;
-                            dialogError = null;
-                            dialogSuccess = null;
-                          });
-
-                          final authProvider =
-                              Provider.of<AuthProvider>(context, listen: false);
-                          final error = await authProvider.resetPassword(email);
-
-                          setDialogState(() {
-                            dialogLoading = false;
-                            if (error != null) {
-                              dialogError = error;
-                            } else {
-                              dialogSuccess = 'Reset link sent! Check your email.';
-                            }
-                          });
-                        },
-                        style: TextButton.styleFrom(foregroundColor: primaryColor),
-                        child: const Text('Send Link'),
-                      ),
-              ],
-            );
-          },
-        );
-      },
-    );
   }
 
   @override
@@ -124,6 +34,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        title: const Text('Create Teacher Account'),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -138,14 +53,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.school,
+                    Icons.person_add,
                     size: 48,
                     color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Teacher Portal',
+                  'Sign Up',
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
@@ -154,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Sign in to manage courses & attendance',
+                  'Create a teacher account to get started',
                   style: TextStyle(color: Colors.grey[600], fontSize: 14),
                 ),
                 const SizedBox(height: 32),
@@ -187,15 +102,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             prefixIcon: const Icon(Icons.lock_outline, color: primaryColor),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+                                obscurePassword ? Icons.visibility_off : Icons.visibility,
                                 color: Colors.grey[600],
                               ),
                               onPressed: () {
-                                setState(() {
-                                  obscurePassword = !obscurePassword;
-                                });
+                                setState(() => obscurePassword = !obscurePassword);
                               },
                             ),
                             border: OutlineInputBorder(
@@ -203,16 +114,28 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                         ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () => _showForgotPasswordDialog(context),
-                            child: const Text(
-                              'Forgot Password?',
-                              style: TextStyle(color: primaryColor, fontSize: 13),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: confirmPasswordController,
+                          obscureText: obscureConfirmPassword,
+                          decoration: InputDecoration(
+                            labelText: 'Confirm Password',
+                            prefixIcon: const Icon(Icons.lock_outline, color: primaryColor),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                                color: Colors.grey[600],
+                              ),
+                              onPressed: () {
+                                setState(() => obscureConfirmPassword = !obscureConfirmPassword);
+                              },
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                         ),
+                        const SizedBox(height: 16),
                         if (errorMessage != null) ...[
                           Text(
                             errorMessage!,
@@ -237,27 +160,58 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                   onPressed: () async {
+                                    final email = emailController.text.trim();
+                                    final password = passwordController.text.trim();
+                                    final confirmPassword = confirmPasswordController.text.trim();
+
+                                    if (email.isEmpty || password.isEmpty) {
+                                      setState(() => errorMessage = 'Fill in all fields');
+                                      return;
+                                    }
+                                    if (password.length < 6) {
+                                      setState(() => errorMessage = 'Password must be at least 6 characters');
+                                      return;
+                                    }
+                                    if (password != confirmPassword) {
+                                      setState(() => errorMessage = 'Passwords do not match');
+                                      return;
+                                    }
+
                                     setState(() {
                                       isLoading = true;
                                       errorMessage = null;
                                     });
-                                    final error = await authProvider.login(
-                                      emailController.text.trim(),
-                                      passwordController.text.trim(),
-                                    );
-                                    if (mounted) {
-                                      setState(() {
-                                        isLoading = false;
-                                        errorMessage = error;
-                                      });
+
+                                    final error = await authProvider.signUp(email, password);
+
+                                    if (!mounted) return;
+
+                                    setState(() => isLoading = false);
+
+                                    if (error != null) {
+                                      setState(() => errorMessage = error);
+                                    } else {
+                                      
+                                      await authProvider.logout();
+
+                                      if (!mounted) return;
+
+                                      // 2. Show confirmation message
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Account created successfully! Please login.'),
+                                          backgroundColor: Colors.green,
+                                        ),
+                                      );
+
+                                      // 3. Navigate back to Login Screen
+                                      Navigator.of(context).pop();
                                     }
                                   },
                                   child: const Text(
-                                    'Login',
+                                    'Sign Up',
                                     style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                        fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                         ),
@@ -267,13 +221,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => const SignupScreen()),
-                    );
-                  },
+                  onPressed: () => Navigator.of(context).pop(),
                   child: const Text(
-                    "Don't have an account? Sign Up",
+                    'Already have an account? Login',
                     style: TextStyle(color: primaryColor),
                   ),
                 ),

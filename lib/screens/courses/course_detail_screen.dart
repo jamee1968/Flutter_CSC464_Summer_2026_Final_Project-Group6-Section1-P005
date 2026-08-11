@@ -13,6 +13,8 @@ class CourseDetailScreen extends StatelessWidget {
 
   const CourseDetailScreen({super.key, required this.course});
 
+  static const List<String> dayOrder = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
   void _showCourseScheduleBottomSheet(BuildContext context, CourseModel course) {
     final routineProvider = Provider.of<RoutineProvider>(context, listen: false);
 
@@ -57,7 +59,12 @@ class CourseDetailScreen extends StatelessWidget {
                   }
 
                   final allSchedules = snapshot.data ?? [];
-final schedules = allSchedules.where((item) => item.courseId == course.docId).toList();
+                  final schedules = allSchedules
+                      .where((item) => item.courseId == course.docId)
+                      .toList()
+                    ..sort((a, b) => dayOrder
+                        .indexOf(a.day ?? '')
+                        .compareTo(dayOrder.indexOf(b.day ?? '')));
 
                   if (schedules.isEmpty) {
                     return const Padding(
