@@ -109,10 +109,21 @@ class _AddEditCourseScreenState extends State<AddEditCourseScreen> {
                                 createdAt: widget.course?.createdAt ?? DateTime.now(),
                               );
 
+                              String? error;
                               if (isEditing) {
-                                await courseProvider.editCourse(widget.course!.docId!, course);
+                                error = await courseProvider.editCourse(widget.course!.docId!, course);
                               } else {
-                                await courseProvider.addCourse(course);
+                                error = await courseProvider.addCourse(course);
+                              }
+
+                              setState(() => isSaving = false);
+
+                              if (error != null) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(SnackBar(content: Text(error)));
+                                }
+                                return;
                               }
 
                               if (context.mounted) Navigator.of(context).pop();
