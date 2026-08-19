@@ -123,18 +123,17 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen> {
                           final isPresent = attendanceStatus[docId] == 'Present';
 
                           return Card(
-                            child: ListTile(
+                            child: CheckboxListTile(
                               title: Text(student.name ?? ''),
                               subtitle: Text('ID: ${student.studentId ?? ''}'),
-                              trailing: Switch(
-                                value: isPresent,
-                                activeColor: Colors.green,
-                                onChanged: (value) {
-                                  setState(() {
-                                    attendanceStatus[docId] = value ? 'Present' : 'Absent';
-                                  });
-                                },
-                              ),
+                              value: isPresent,
+                              activeColor: Colors.green,
+                              controlAffinity: ListTileControlAffinity.trailing,
+                              onChanged: (value) {
+                                setState(() {
+                                  attendanceStatus[docId] = (value ?? false) ? 'Present' : 'Absent';
+                                });
+                              },
                             ),
                           );
                         },
